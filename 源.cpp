@@ -18,6 +18,8 @@ int Residual[PRIMECOUNT];
 
 ull Buffer[MAXLENGTH<<1];
 
+//struct的成员都是public类型
+
 struct Integer
 {
 	//length表示A数组保存内容的长度 不是二进制位的长度
@@ -31,7 +33,7 @@ struct Integer
 	void Initial(char * s)
 	{
 		memset(A,0,sizeof(A));
-		binLength = (int)strlen(s);
+		binLength = int(strlen(s));
 		isZero = false;
 		int now = BIT/4;
 		for (int i = 0; i < binLength; ++i)
