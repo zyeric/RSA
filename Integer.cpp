@@ -486,6 +486,84 @@ void Integer::PrintHex()
 	printf("\n");
 }
 
+Integer Divide(Integer p, Integer q)
+{
+	Integer res = Integer();
+
+	while (true)
+	{
+		int cmpRes = p.CompareTo(q);
+		if (cmpRes == -1)
+		{
+			break;
+		}
+		if (cmpRes == 0)
+		{
+			res.A[0] |= 1;
+			break;
+		}
+
+		//若二进制位相等且p和q的位数相等 商加1
+		if (p.binLength == q.binLength)
+		{
+			res.A[0] |= 1;
+			break;
+		}
+
+		Integer tmp = q.ShiftLeft(p.binLength - q.binLength);
+		int cmpRes2 = p.CompareTo(tmp);
+		if (cmpRes2 == 0)
+		{
+			int now = p.binLength-q.binLength;
+			res.A[now/BIT] |= 1<<(now%BIT);
+			//res = res.Add(Integer::Power2(p.binLength-q.binLength));
+			break;
+		}
+		else
+		{
+			if (cmpRes2 < 0)
+			{
+				int now = p.binLength - q.binLength - 1;
+				res.A[now/BIT] |= 1<<(now%BIT);
+				//res = res.Add(Integer::Power2(p.binLength - q.binLength - 1));
+				p = p.Sub(q.ShiftLeft(p.binLength - q.binLength - 1));
+			}
+			else
+			{
+				int now = p.binLength-q.binLength;
+				res.A[now/BIT] |= 1<<(now%BIT);
+				//res = res.Add(Integer::Power2(p.binLength - q.binLength));
+				p = p.Sub(tmp);
+			}
+		}
+	}
+
+	for (int i = p.length-1; i >= 0; --i)
+	{
+		if (res.A[i] != 0)
+		{
+			res.length = i+1;
+			res.binLength = i*BIT;
+			for (int j = BIT-1; j >= 0; --j)
+			{
+				if (res.A[i] & (1<<j))
+				{
+					res.binLength += 1+j;
+					break;
+				}
+			}
+			break;
+		}
+	}
+
+	if (res.binLength == 0 && res.length == 0 && res.A[0] == 0)
+	{
+		res.isZero = true;
+	}
+
+	return res;
+}
+
 //返回p mod q
 Integer Mod(Integer p, Integer q)
 {
@@ -852,11 +930,144 @@ Integer Montgomery_Generate_Prime(int n)
 	return a;
 }
 
-void GenerateKeys(int bits, Integer &P, Integer &Q, Integer &N)
+void Extended_Sub(Integer a, int sign_a, Integer b, int sign_b, Integer& c, int& sign_c)
+{
+	if (sign_a >= 0 && sign_b >= 0)
+	{
+		int cmpRes = a.CompareTo(b);
+		if (cmpRes == 0)
+		{
+			sign_c = 0;
+			c = Integer::ZERO();
+		}
+		else if (cmpRes > 0)
+		{
+			c = a.Sub(b);
+			sign_c = 1;
+		}
+		else
+		{
+			c = b.Sub(a);
+			sign_c = -1;
+		}
+	}
+	
+	if (sign_a >= 0 && sign_b < 0)
+	{
+		sign_c = 1;
+		c = a.Add(b);
+	}
+
+	if (sign_a < 0 && sign_b < 0)
+	{
+		int cmpRes = a.CompareTo(b);
+		if (cmpRes == 0)
+		{
+			sign_c = 0;
+			c = Integer::ZERO();
+		}
+		else if (cmpRes > 0)
+		{
+			sign_c = -1;
+			c = a.Sub(b);
+		}
+		else
+		{
+			sign_c = 1;
+			c = b.Sub(a);
+		}
+	}
+
+	if (sign_a < 0 && sign_b > 0)
+	{
+		sign_c = -1;
+		c = a.Add(b);
+	}
+}
+
+//求a 关于 b的逆元
+//保证a和b互素
+Integer Normal_Inv(Integer a, Integer b)
+{
+	Integer u = Integer::ONE();
+	int sign_u = 1;
+	Integer e = Integer::ZERO();
+	int sign_e = 0;
+	Integer v = Integer::ZERO();
+	int sign_v = 0;
+	Integer f = Integer::ONE();
+	int sign_f = 1;
+
+	Integer tmp;
+	int sign_tmp;
+	Integer mul;
+
+	Integer _b = b;
+
+	while (b.isZero == false)
+	{
+		Integer q = Divide(a, b);
+		Integer r = a.Sub(q.Multiply(b));
+		a = b;
+		b = r;
+
+		mul = q.Multiply(e);
+		Extended_Sub(u, sign_u, mul, sign_e, tmp, sign_tmp);
+
+		u = e;
+		sign_u = sign_e;
+		e = tmp;
+		sign_e = sign_tmp;
+
+		mul = q.Multiply(f);
+		Extended_Sub(v, sign_v, mul, sign_f, tmp, sign_tmp);
+		v = f;
+		sign_v = sign_f;
+		f = tmp;
+		sign_f = sign_tmp;
+	}
+
+	if (sign_u < 0)
+	{
+		u = _b.Sub(u);
+	}
+
+	return u;
+}
+
+void GenerateKeys(int bits, Integer &P, Integer &Q, Integer &N, Integer &E, Integer &D)
 {
 	srand((unsigned)time(NULL));
 	MillerInitial();
-	P = Montgomery_Generate_Prime(bits);
-	Q = Montgomery_Generate_Prime(bits);
+	P = Montgomery_Generate_Prime(bits>>1);
+	Q = Montgomery_Generate_Prime(bits>>1);
 	N = P.Multiply(Q);
+	Integer Phi = N.Sub(P).Sub(Q);
+	Phi.Add1();
+	while (true)
+	{
+		//Phi一定是偶数 这里的E设置为奇数
+		E = Integer(bits);
+		Integer t = GCD(E, Phi);
+		if (t.binLength == 1 && t.A[0] == 1)
+		{
+			if (E.CompareTo(Phi) == 1)
+			{
+				E = Mod(E, Phi);
+			}
+			Integer T;
+			D = Normal_Inv(E, Phi);
+			break;
+		}
+	}
+}
+
+Integer Encrypt(Integer X, Integer E, Integer N)
+{
+	return PowMod(X, E, N);
+}
+
+Integer Decrypt(Integer X, Integer D, Integer N)
+{
+	return PowMod(X, D, N);
 }
