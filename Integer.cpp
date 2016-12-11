@@ -477,11 +477,13 @@ void Integer::PrintHex()
 {
 	if (isZero)
 	{
-		printf("0");
+		printf("0\n");
+		return;
 	}
-	for (int i = length - 1; i >= 0; --i)
+	printf("%X", A[length-1]);
+	for (int i = length - 2; i >= 0; --i)
 	{
-		printf("%X ", A[i]);
+		printf("%06X", A[i]);
 	}
 	printf("\n");
 }
@@ -1060,14 +1062,4 @@ void GenerateKeys(int bits, Integer &P, Integer &Q, Integer &N, Integer &E, Inte
 			break;
 		}
 	}
-}
-
-Integer Encrypt(Integer X, Integer E, Integer N)
-{
-	return PowMod(X, E, N);
-}
-
-Integer Decrypt(Integer X, Integer D, Integer N)
-{
-	return PowMod(X, D, N);
 }

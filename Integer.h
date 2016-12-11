@@ -63,5 +63,4 @@ public:
 
 //N 是 bits位的 P和Q是bits/2位的素数
 extern void GenerateKeys(int bits, Integer &P, Integer &Q, Integer &N, Integer &E, Integer &D);
-extern Integer Encrypt(Integer X, Integer E, Integer N);
-extern Integer Decrypt(Integer X, Integer D, Integer N);
+extern Integer PowMod(Integer a, Integer n, Integer p);
