@@ -3,6 +3,7 @@ typedef unsigned long long ull;
 
 const int BIT = 24;
 const int BITMAX = 1<<BIT;
+const int BITMAXMASK = (1<<BIT)-1;
 const int MAXLENGTH = 1024/BIT+1;
 const int MILLERTIME = 20;
 

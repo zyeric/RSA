@@ -376,7 +376,95 @@ Integer Integer::Remove(int n)
 	return ret;
 }
 
-	//做乘法
+//uint low[MAXLENGTH<<1], high[MAXLENGTH<<1];
+//做乘法
+//Integer Integer::Multiply(Integer p)
+//{
+//	Integer res = Integer();
+//
+//	for (int i = 0; i < length + p.length; ++i)
+//	{
+//		low[i] = 0;
+//		high[i] = 0;
+//	}
+//
+//	uint t1, t2, t3, t4;
+//
+//	for (int i = 0; i < length; ++i)
+//	{
+//		for (int j = 0; j < p.length; ++j)
+//		{
+//			t1 = A[i];
+//			t2 = p.A[j];
+//			__asm
+//			{
+//				mov eax, t1;
+//				mov ecx, t2;
+//				mul ecx;
+//				mov t3, eax;
+//				mov t4, edx;
+//			}
+//			t1 = low[i+j];
+//			t2 = high[i+j];
+//			__asm
+//			{
+//				mov eax, t1;
+//				mov ebx, t3;
+//				add eax, ebx;
+//				mov t1, eax;
+//				mov eax, t2;
+//				mov ebx, t4;
+//				adc eax, ebx;
+//				mov t2, eax;
+//			}
+//			low[i+j] = t1;
+//			high[i+j] = t2;
+//		}
+//	}
+//
+//	uint carry = 0;
+//	for (int i = 0; i < length + p.length; ++i)
+//	{
+//		uint tmp1 = low[i]&BITMAXMASK;
+//		uint tmp2 = (low[i]>>BIT)|(high[i]<<(32-BIT));
+//		tmp1 += carry;
+//		if (tmp1 >= BITMAX)
+//		{
+//			tmp2 += tmp1>>BIT;
+//			tmp1 = tmp1 & BITMAXMASK;
+//		}
+//		low[i] = tmp1;
+//		carry = tmp2;
+//	}
+//
+//	if (low[length+p.length-1] != 0)
+//	{
+//		res.length = length + p.length;
+//	}
+//	else
+//	{
+//		res.length = length + p.length - 1;
+//	}
+//
+//	for (int i = 0; i < res.length; ++i)
+//	{
+//		res.A[i] = low[i];
+//	}
+//
+//	res.binLength = BIT*(res.length-1);
+//	for (int i = BIT-1; i >= 0; --i)
+//	{
+//		if (res.A[res.length-1] & (1<<i))
+//		{
+//			res.binLength += i + 1;
+//			break;
+//		}
+//	}
+//
+//	return res;
+//}
+
+//做乘法
 Integer Integer::Multiply(Integer p)
 {
 	Integer res = Integer();
@@ -400,8 +488,10 @@ Integer Integer::Multiply(Integer p)
 		Buffer[i] += carry;
 		if (Buffer[i] >= BITMAX)
 		{
-			carry = Buffer[i] / BITMAX;
-			Buffer[i] = Buffer[i] % BITMAX;
+			//carry = Buffer[i] / BITMAX;
+			//Buffer[i] = Buffer[i] % BITMAX;
+			carry = Buffer[i] >> BIT;
+			Buffer[i] = Buffer[i] & BITMAXMASK;
 		}
 		else
 		{
@@ -435,6 +525,7 @@ Integer Integer::Multiply(Integer p)
 
 	return res;
 }
+
 
 //返回1表示当前数大
 //返回0表示相等

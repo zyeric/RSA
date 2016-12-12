@@ -1,8 +1,12 @@
 #include "Integer.h"
 #include <cstdlib>
+#include <time.h>
+#include <cstdio>
 
 int main(int argc, char* argv[])
 {
+	clock_t start, end;
+	start = clock();
 	if (argc == 3)
 	{
 		//…˙≥…√‹‘ø
@@ -24,5 +28,7 @@ int main(int argc, char* argv[])
 		Integer d = PowMod(a, b, c);
 		d.PrintHex();
 	}
+	end = clock();
+	printf("Time Cost: %.3lfs\n", (double)(end-start)/CLOCKS_PER_SEC);
 	return 0;
 }
