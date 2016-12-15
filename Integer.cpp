@@ -3,6 +3,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <algorithm>
+#include <thread>
+#include <vector>
 
 ull Buffer[MAXLENGTH<<1];
 
@@ -107,35 +109,69 @@ Integer Integer::ShiftLeft(int n)
 	return res;
 }
 
+//Integer Integer::ShiftRight(int n)
+//{
+//	Integer res = Integer();
+//
+//	bool flag = false;
+//	for (int i = length - 1; i >= 0; --i)
+//	{
+//		for (int j = BIT-1; j >= 0; --j)
+//		{
+//			if (A[i] & (1 << j))
+//			{
+//				int now = i * BIT + j;
+//				int nxt = now - n;
+//				if (nxt < 0)
+//				{
+//					flag = true;
+//					break;
+//				}
+//				else
+//				{
+//					res.A[nxt/BIT] |= (1<<(nxt%BIT));
+//				}
+//			}
+//		}
+//		if (flag)	break;
+//	}
+//
+//	//维护length和binLength
+//	res.binLength = binLength - n;
+//	res.length = res.binLength % BIT == 0 ? res.binLength/BIT : (res.binLength/BIT+1);
+//
+//	return res;
+//}
+
 Integer Integer::ShiftRight(int n)
 {
-	Integer res = Integer();
+    Integer res = Integer();
+    int left = n%BIT;
+    int right = BIT - left;
+    uint mask = (1<<left)-1;
+    //第n位在的位置移动的是高位 即right部分
+    int cnt = 0;
+    res.A[cnt] = A[n/BIT] >> left;
 
-	bool flag = false;
-	for (int i = length - 1; i >= 0; --i)
-	{
-		for (int j = BIT-1; j >= 0; --j)
-		{
-			if (A[i] & (1 << j))
-			{
-				int now = i * BIT + j;
-				int nxt = now - n;
-				if (nxt < 0)
-				{
-					flag = true;
-					break;
-				}
-				else
-				{
-					res.A[nxt/BIT] |= (1<<(nxt%BIT));
-				}
-			}
-		}
-		if (flag)	break;
-	}
+    for (int i = n/BIT + 1; i < length - 1; ++i)
+    {
+        res.A[cnt] = res.A[cnt] | ((A[i] & mask) << right);
+        cnt ++;
+        res.A[cnt] = A[i] >> left;
+    }
 
-	//维护length和binLength
-	res.binLength = binLength - n;
+    int low = (binLength-1) - ((binLength-1)%BIT);
+
+    for (int i = low; i < binLength; ++i)
+    {
+        int nxt = i-n;
+        if (A[i/BIT] & (1<<(i%BIT)))
+        {
+            res.A[nxt/BIT] |= 1<<(nxt%BIT);
+        }
+    }
+
+    res.binLength = binLength - n;
 	res.length = res.binLength % BIT == 0 ? res.binLength/BIT : (res.binLength/BIT+1);
 
 	return res;
@@ -375,94 +411,6 @@ Integer Integer::Remove(int n)
 
 	return ret;
 }
-
-//uint low[MAXLENGTH<<1], high[MAXLENGTH<<1];
-//做乘法
-//Integer Integer::Multiply(Integer p)
-//{
-//	Integer res = Integer();
-//
-//	for (int i = 0; i < length + p.length; ++i)
-//	{
-//		low[i] = 0;
-//		high[i] = 0;
-//	}
-//
-//	uint t1, t2, t3, t4;
-//
-//	for (int i = 0; i < length; ++i)
-//	{
-//		for (int j = 0; j < p.length; ++j)
-//		{
-//			t1 = A[i];
-//			t2 = p.A[j];
-//			__asm
-//			{
-//				mov eax, t1;
-//				mov ecx, t2;
-//				mul ecx;
-//				mov t3, eax;
-//				mov t4, edx;
-//			}
-//			t1 = low[i+j];
-//			t2 = high[i+j];
-//			__asm
-//			{
-//				mov eax, t1;
-//				mov ebx, t3;
-//				add eax, ebx;
-//				mov t1, eax;
-//				mov eax, t2;
-//				mov ebx, t4;
-//				adc eax, ebx;
-//				mov t2, eax;
-//			}
-//			low[i+j] = t1;
-//			high[i+j] = t2;
-//		}
-//	}
-//
-//	uint carry = 0;
-//	for (int i = 0; i < length + p.length; ++i)
-//	{
-//		uint tmp1 = low[i]&BITMAXMASK;
-//		uint tmp2 = (low[i]>>BIT)|(high[i]<<(32-BIT));
-//		tmp1 += carry;
-//		if (tmp1 >= BITMAX)
-//		{
-//			tmp2 += tmp1>>BIT;
-//			tmp1 = tmp1 & BITMAXMASK;
-//		}
-//		low[i] = tmp1;
-//		carry = tmp2;
-//	}
-//
-//	if (low[length+p.length-1] != 0)
-//	{
-//		res.length = length + p.length;
-//	}
-//	else
-//	{
-//		res.length = length + p.length - 1;
-//	}
-//
-//	for (int i = 0; i < res.length; ++i)
-//	{
-//		res.A[i] = low[i];
-//	}
-//
-//	res.binLength = BIT*(res.length-1);
-//	for (int i = BIT-1; i >= 0; --i)
-//	{
-//		if (res.A[res.length-1] & (1<<i))
-//		{
-//			res.binLength += i + 1;
-//			break;
-//		}
-//	}
-//
-//	return res;
-//}
 
 //做乘法
 Integer Integer::Multiply(Integer p)
