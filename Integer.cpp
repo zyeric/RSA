@@ -86,28 +86,54 @@ Integer Integer::Power2(int n)
 	return ret;
 }
 
+/*
+ * 左移在除法和取模中用到
+ */
+//Integer Integer::ShiftLeft(int n)
+//{
+//	Integer res = Integer();
+//	for (int i = 0; i < length; ++i)
+//	{
+//		for (int j = 0; j < BIT; ++j)
+//		{
+//			if (A[i] & (1 << j))
+//			{
+//				int now = i * BIT + j;
+//				int nxt = now + n;
+//				res.A[nxt/BIT] |= (1<<(nxt%BIT));
+//			}
+//		}
+//	}
+//
+//	//维护length和binLength
+//	res.binLength = binLength + n;
+//	res.length = res.binLength % BIT == 0 ? res.binLength/BIT : (res.binLength/BIT+1);
+//
+//	return res;
+//}
+
 Integer Integer::ShiftLeft(int n)
 {
 	Integer res = Integer();
+	
+	int right = n % BIT;
+	int left = BIT - right;
+	uint mask = (1<<left)-1;
+	int cnt = n / BIT;
+	
 	for (int i = 0; i < length; ++i)
 	{
-		for (int j = 0; j < BIT; ++j)
-		{
-			if (A[i] & (1 << j))
-			{
-				int now = i * BIT + j;
-				int nxt = now + n;
-				res.A[nxt/BIT] |= (1<<(nxt%BIT));
-			}
-		}
+		res.A[cnt] |= (A[i]&mask) << right;
+		cnt ++;
+		res.A[cnt] |= A[i] >> left;
 	}
 
 	//维护length和binLength
 	res.binLength = binLength + n;
 	res.length = res.binLength % BIT == 0 ? res.binLength/BIT : (res.binLength/BIT+1);
-
 	return res;
 }
+
 
 //Integer Integer::ShiftRight(int n)
 //{
@@ -143,6 +169,12 @@ Integer Integer::ShiftLeft(int n)
 //	return res;
 //}
 
+/*
+ * 移位操作实际上可以多位一起处理
+ * 将A[i]分成left和right两部分
+ * A[i]移动两次
+ * 为了提高效率 中间操作均为位运算
+ */
 Integer Integer::ShiftRight(int n)
 {
     Integer res = Integer();
@@ -153,22 +185,11 @@ Integer Integer::ShiftRight(int n)
     int cnt = 0;
     res.A[cnt] = A[n/BIT] >> left;
 
-    for (int i = n/BIT + 1; i < length - 1; ++i)
+    for (int i = n/BIT + 1; i < length; ++i)
     {
-        res.A[cnt] = res.A[cnt] | ((A[i] & mask) << right);
+        res.A[cnt] |= ((A[i] & mask) << right);
         cnt ++;
         res.A[cnt] = A[i] >> left;
-    }
-
-    int low = (binLength-1) - ((binLength-1)%BIT);
-
-    for (int i = low; i < binLength; ++i)
-    {
-        int nxt = i-n;
-        if (A[i/BIT] & (1<<(i%BIT)))
-        {
-            res.A[nxt/BIT] |= 1<<(nxt%BIT);
-        }
     }
 
     res.binLength = binLength - n;
