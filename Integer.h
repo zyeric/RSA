@@ -29,21 +29,21 @@ public:
 	static Integer ZERO();
 	static Integer Power2(int n);
 
-	Integer ShiftRight(int n);
-	Integer ShiftLeft(int n);
+	Integer ShiftRight(int n) const;
+	Integer ShiftLeft(int n) const;
 
-	bool IsOne();
+	bool IsOne() const;
 	
 	void Add1();
 	void Add2();
-	Integer Add(Integer p);
+	Integer Add(Integer p) const;
 
 	Integer Sub1();
 	//n-1=d*2^s
 	//返回d
 	Integer SubDecompose();
 	//假设p小于当前数
-	Integer Sub(Integer p);
+	Integer Sub(Integer p) const;
 
 	//将比第n位高的数全设为0 包括第n位
 	//假设n > 0
@@ -56,7 +56,7 @@ public:
 	//返回1表示当前数大
 	//返回0表示相等
 	//返回-1表示p大
-	int CompareTo(Integer p);
+	int CompareTo(Integer p) const;
 
 	void PrintDecimal();
 	void PrintHex();

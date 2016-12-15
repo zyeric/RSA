@@ -1,10 +1,7 @@
 #include "Integer.h"
 #include <time.h>
-#include <cstring>
 #include <cstdlib>
-#include <algorithm>
 #include <thread>
-#include <vector>
 
 ull Buffer[MAXLENGTH<<1];
 
@@ -112,7 +109,7 @@ Integer Integer::Power2(int n)
 //	return res;
 //}
 
-Integer Integer::ShiftLeft(int n)
+Integer Integer::ShiftLeft(int n) const
 {
 	Integer res = Integer();
 	
@@ -175,7 +172,8 @@ Integer Integer::ShiftLeft(int n)
  * A[i]移动两次
  * 为了提高效率 中间操作均为位运算
  */
-Integer Integer::ShiftRight(int n)
+
+Integer Integer::ShiftRight(int n) const
 {
     Integer res = Integer();
     int left = n%BIT;
@@ -198,7 +196,7 @@ Integer Integer::ShiftRight(int n)
 	return res;
 }
 
-bool Integer::IsOne()
+bool Integer::IsOne() const
 {
 	return (binLength == 1) && (A[0] == 1);
 }
@@ -225,7 +223,7 @@ void Integer::Add2()
 	Add1();
 }
 
-Integer Integer::Add(Integer p)
+Integer Integer::Add(Integer p) const
 {
 	Integer ret= Integer();
 
@@ -344,7 +342,7 @@ Integer Integer::SubDecompose()
 	return tmp.ShiftRight(n);
 }
 
-Integer Integer::Sub(Integer p)
+Integer Integer::Sub(Integer p) const
 {
 	Integer res = Integer();
 	int own = 0;
@@ -499,7 +497,7 @@ Integer Integer::Multiply(Integer p)
 //返回1表示当前数大
 //返回0表示相等
 //返回-1表示p大
-int Integer::CompareTo(Integer p)
+int Integer::CompareTo(Integer p) const
 {
 	if (binLength < p.binLength)
 	{
@@ -707,6 +705,7 @@ Integer PowMod(Integer a, Integer n, Integer p)
 //求p关于2^bits的逆元
 //p保证是奇数
 //所以p^{2^{bits-1}}一定是1
+
 Integer Inv(Integer p, int bits)
 {
 	Integer cur = p;
