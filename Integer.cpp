@@ -393,43 +393,98 @@ Integer Integer::Sub(Integer p) const
 Integer Integer::Remove(int n)
 {
 	Integer ret = Integer();
-
-	for (int i = 0; i < length; ++i)
+	
+	//保留的位数是第0到n-1位
+	if (n % BIT == 0)
 	{
-		ret.A[i] = A[i];
-	}
-
-	for (int i = n; i < binLength; ++i)
-	{
-		int x = i / BIT;
-		int y = i % BIT;
-		if (ret.A[x] & (1<<y))
+		for (int i = 0; i < n/BIT; ++i)
 		{
-			ret.A[x] ^= (1<<y);
+			ret.A[i] = A[i];
+		}
+		for (int i = n/BIT-1; i >= 0; --i)
+		{
+			if (ret.A[i] != 0)
+			{
+				ret.length = i+1;
+				for (int j = BIT-1; j >= 0; --j)
+				{
+					if (ret.A[i] & (1<<j))
+					{
+						ret.binLength = i*BIT+j+1;
+						break;
+					}
+				}
+				break;
+			}
 		}
 	}
-
-	for (int i = length -1; i >= 0; --i)
+	else
 	{
-		if (ret.A[i] > 0)
+		for (int i = 0; i < n/BIT; ++i)
 		{
-			ret.length = i+1;
-			break;
+			ret.A[i] = A[i];
+		}
+		ret.A[n/BIT] = A[n/BIT] & ((1<<(n%BIT))-1);
+		for (int i = n/BIT; i >= 0; --i)
+		{
+			if (ret.A[i] != 0)
+			{
+				ret.length = i+1;
+				for (int j = BIT-1; j >= 0; --j)
+				{
+					if (ret.A[i] & (1<<j))
+					{
+						ret.binLength = i*BIT+j+1;
+						break;
+					}
+				}
+				break;
+			}
 		}
 	}
-
-	ret.binLength = BIT*(ret.length-1);
-	for (int i = BIT-1; i >= 0; --i)
-	{
-		if (ret.A[ret.length-1] & (1<<i))
-		{
-			ret.binLength += i+1;
-			break;
-		}
-	}
-
 	return ret;
 }
+
+//Integer Integer::Remove(int n)
+//{
+//	Integer ret = Integer();
+//
+//	for (int i = 0; i < length; ++i)
+//	{
+//		ret.A[i] = A[i];
+//	}
+//
+//	for (int i = n; i < binLength; ++i)
+//	{
+//		int x = i / BIT;
+//		int y = i % BIT;
+//		if (ret.A[x] & (1<<y))
+//		{
+//			ret.A[x] ^= (1<<y);
+//		}
+//	}
+//
+//	for (int i = length -1; i >= 0; --i)
+//	{
+//		if (ret.A[i] > 0)
+//		{
+//			ret.length = i+1;
+//			break;
+//		}
+//	}
+//
+//	ret.binLength = BIT*(ret.length-1);
+//	for (int i = BIT-1; i >= 0; --i)
+//	{
+//		if (ret.A[ret.length-1] & (1<<i))
+//		{
+//			ret.binLength += i+1;
+//			break;
+//		}
+//	}
+//
+//	return ret;
+//}
 
 //做乘法
 Integer Integer::Multiply(Integer p)
