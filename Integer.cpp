@@ -962,7 +962,8 @@ bool Normal_Miller_Rabin(Integer p)
 	return true;
 }
 
-const int PRIMECOUNT = 50;
+//1000个素数最大不超过8000
+const int PRIMECOUNT = 1000;
 int Primes[PRIMECOUNT];
 int Residual[PRIMECOUNT];
 
@@ -1011,8 +1012,9 @@ Integer Montgomery_Generate_Prime(int n)
 		int cur = 1;
 		for (int j = 0; j < a.length; ++j)
 		{
-			mod[i] = mod[i] + cur*a.A[j];
-			cur = cur * Residual[i] % Primes[i];
+			int tmp = 1ll * cur * a.A[j] % Primes[i];
+			mod[i] = mod[i] + tmp;
+			cur = 1ll * cur * Residual[i] % Primes[i];
 		}
 		mod[i] %= Primes[i];
 	}
@@ -1028,6 +1030,7 @@ Integer Montgomery_Generate_Prime(int n)
 				break;
 			}
 		}
+		
 		if (flag && MongomeryMillar_Rabin(a))
 		{
 			//a.PrintHex();
